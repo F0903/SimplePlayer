@@ -3,16 +3,12 @@ class Button {
     this.rect = rect; 
   }
   
-  private Rect rect;
+  Rect rect;
   private color clr = #FFFFFF;
   protected boolean clicked;
   
   private boolean stroke;
   private int radius;
-  
-  void SetRect (Rect rect){
-    this.rect = rect;
-  }
   
   void SetColor(color clr) {
     this.clr = clr;

@@ -1,88 +1,13 @@
 class Slider { //<>//
-  //TODO: Use button instead
-  class SliderHandle {
-    public SliderHandle(color clr, float w, float h) {
-      this.clr = clr;
-      this.w = w;
-      this.h = h;
-    }
-
-    private Slider parent = null;
-
-    private color clr;
-    private float w, h;
-    private float position; 
-    private PImage img = null;
-    private float imgScale = 1;
-
-    void SetParent(Slider parent) {
-      this.parent = parent;
-    }
-
-    void LoadImage(String path) {
-      img = loadImage(path);
-    }
-
-    void SetImageScale(float imgScale) {
-      this.imgScale = imgScale;
-    }
-
-    float GetPosition() {
-      return position;
-    }
-
-    boolean IsMouseAbove() {
-      float position = GetPosition();
-      final float x = parent.x + position;
-      final float y = parent.y + ((parent.h - h)/2);
-      final float mX = mouseX;
-      final float mY = mouseY;
-      final boolean xMatch = (mX > x && mX < x+w);
-      final boolean yMatch = (mY > y && mY < y+h); 
-      return xMatch && yMatch;
-    }
-
-    void SetPosition(float pos) {
-      if (parent == null)
-        throw new NullPointerException("Please set parent.");
-      final float max = parent.w - w;
-      final float min = 0;
-      if (pos > max) pos = max;
-      if (pos < min) pos = min;
-      position = pos;
-    }
-
-    void UpdateToMouse() {
-      final float newX = mouseX - parent.x - w/2;
-      SetPosition(newX);
-    }
-
-    void Draw() {
-      final float x = parent.x;
-      final float y = parent.y;
-      final float localX = x + position;
-      final float localY = y + ((parent.h - h)/2);
-      pushStyle();
-      fill(clr);
-      noStroke();
-      rect(localX, localY, w, h, 25);
-      if (img != null) { 
-        final float imgW = w * imgScale;
-        final float imgH = h * imgScale;
-        image(img, localX + imgW/2, localY + imgH/2, imgW, imgH);
-      }
-      popStyle();
-    }
-  }
-
   public Slider(float x, float y, float w, float h) {
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
+    SetupHandle();
   }
 
-  private SliderHandle handle;
+  private Button handle;
 
   private float x, y;
   private float w, h;
@@ -91,9 +16,11 @@ class Slider { //<>//
 
   private color clr = #FFFFFF;
 
-  void SetHandle(SliderHandle handle) { 
-    this.handle = handle;
-    handle.SetParent(this);
+  private void SetupHandle() {
+    final Button button = new Button(new Rect(x, y, h, h));
+    button.rect.Set(x, y, h, h);
+    handle = button;   
+    SetValue(1);
   }
 
   float GetLength() {
@@ -104,15 +31,52 @@ class Slider { //<>//
     this.clr = clr;
   }
 
+  void SetHandleColor(color clr) {
+    handle.SetColor(clr);
+  }
+
+  void SetHandleRadius(int radius) {
+    handle.SetRadius(radius);
+  }
+
+  private final float GetHandleRightBound() {
+    return x + w - handle.rect.w;
+  }
+
+  private final float GetHandleLeftBound() {
+    return x;
+  }
+
   float GetValue() {
-    final float handlePos = handle.GetPosition(); 
-    return handlePos / (w - handle.w);
+    final float rightBound = GetHandleRightBound();
+    final float leftBound = GetHandleLeftBound();
+    final float handlePos = (handle.rect.x - leftBound) / (rightBound - leftBound);  
+    println(handlePos);
+    return handlePos;
+  }
+
+  void SetHandleImage(String path, float scale) {
+    final ImageButton imgBtn = new ImageButton(path, handle.rect);
+    imgBtn.LoadImage(path);
+    imgBtn.SetImageScale(scale);
+    handle = imgBtn;
+  }
+
+  void SetHandlePosition(float newX) {
+    final float rightBound = GetHandleRightBound();
+    final float leftBound = GetHandleLeftBound();
+    if (newX > rightBound) newX = rightBound;
+    else if (newX < leftBound) newX = leftBound;
+    handle.rect.x = newX;
   }
 
   void SetValue(float val) {
     if (val > 1) val = 1;
-    if (val < 0) val = 0;
-    handle.SetPosition((w - handle.w) * val);
+    else if (val < 0) val = 0; 
+    
+    final float rightBound = GetHandleRightBound();
+    final float leftBound = GetHandleLeftBound();
+    SetHandlePosition((rightBound - leftBound) * val + leftBound);
   }
 
   void Draw() {
@@ -122,7 +86,10 @@ class Slider { //<>//
     rect(x, y, w, h, 25);
     popStyle();
 
-    if (dragging) handle.UpdateToMouse();
+    if (dragging) {
+      SetHandlePosition(mouseX - handle.rect.w/2);
+    }
+
     handle.Draw();
   }
 

@@ -20,7 +20,7 @@ class FileSelector {
     btnRect.w = btnRect.h;
     btnRect.x = (rect.x + rect.w) - btnRect.w;
     
-    button.SetRect(btnRect);
+    button.rect = btnRect;
     button.SetStroke(false);
     button.SetColor(#FF8E15);
     button.SetRadius(25);
