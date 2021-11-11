@@ -27,16 +27,18 @@ void setup() {
   songSelector.LoadImage("file-audio-solid.png", 0.5);
 
   final float sliderW = 500;
-  volume = new Slider(anchorX - sliderW/2, anchorY, sliderW, 100); 
+  volume = new Slider(new Rect(anchorX - sliderW/2, anchorY, sliderW, 100)); 
   volume.SetHandleImage("volume-down-solid.png", 0.5); 
   volume.SetHandleColor(#FF2211);
   volume.SetHandleRadius(25);
   volume.SetValue(1);
 
-  speed = new Slider(anchorX - sliderW/2, anchorY - 150, sliderW, 100); 
+  speed = new Slider(new Rect(anchorX - sliderW/2, anchorY - 150, sliderW, 100)); 
   speed.SetHandleImage("frog-solid.png", 0.5); 
   speed.SetHandleColor(#2B9CFF);
   speed.SetHandleRadius(25);
+  speed.SetSnapEnabled(true);
+  speed.SetSnap(0.45, 0.55, 0.5);
   speed.SetValue(0.5);
 
   final float playW = 100;
