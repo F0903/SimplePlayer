@@ -1,62 +1,92 @@
 import processing.sound.*;
 
-SoundFile sound;
+FileSelector songSelector;
 Slider speed;
 Slider volume;
-PlayButton play;
+ToggleButton play;
+
+SoundFile sound;
 
 void setup() {
   size(600, 600);
   frameRate(60);
   background(#111111);
 
+  final String startSong = "sus.mp3";
+
   final float anchorX = width/2;
-  final float anchorY = height/2 - 50;
+  final float anchorY = height/2 + 20;
 
   textAlign(CENTER);
   textSize(50);
-  text("Loading...", anchorX, anchorY+50);
+  text("Loading...", width/2, height/2);
+
+  final float selectorW = 500;
+  songSelector = new FileSelector(new Rect(anchorX - selectorW/2, anchorY - 265, selectorW, 65), #FFFFFF);
+  songSelector.SetSelectionText(startSong);
+  songSelector.LoadImage("file-audio-solid.png", 0.5);
 
   final float sliderW = 500;
   volume = new Slider(anchorX - sliderW/2, anchorY, sliderW, 100);
-  volume.SetHandle(volume.new SliderHandle(#FF2211, 100, 100));
+  final Slider.SliderHandle volumeHandle = volume.new SliderHandle(#FF2211, 100, 100);
+  volumeHandle.LoadImage("volume-down-solid.png");
+  volumeHandle.SetImageScale(0.5);
+  volume.SetHandle(volumeHandle);
   volume.SetValue(1);
 
   speed = new Slider(anchorX - sliderW/2, anchorY - 150, sliderW, 100);
-  speed.SetHandle(speed.new SliderHandle(#2B9CFF, 100, 100));
+  final Slider.SliderHandle speedHandle = speed.new SliderHandle(#2B9CFF, 100, 100);
+  speedHandle.LoadImage("frog-solid.png");
+  speedHandle.SetImageScale(0.5);
+  speed.SetHandle(speedHandle);
   speed.SetValue(0.5);
 
   final float playW = 100;
-  play = new ImagePlayButton("play-pause.png", anchorX - playW/2, anchorY + 150, playW, playW);
+  play = new ToggleButton(new Rect(anchorX - playW/2, anchorY + 150, playW, playW), "play-solid.png", "pause-solid.png"); 
+  play.SetColor(#676767);
+  play.SetRadius(25);
+  play.SetImageScale(0.5);
 
   sound = new SoundFile(this, "sus.mp3");
-  sound.loop();
+  sound.play();
 }
 
 void draw() {
   background(#111111);
 
+  songSelector.Draw();
+  if (songSelector.HasSelected()) {
+    final String selection = songSelector.GetSelection();
+    sound.stop();
+    sound = new SoundFile(this, selection);
+    sound.play();
+    play.Invert();
+  }
+
   speed.Draw();
   volume.Draw();
-  println(volume.GetValue());
   sound.amp(volume.GetValue());
   sound.rate(speed.GetValue() * 2);
 
   play.Draw();
   if (play.IsClicked()) {
-    final boolean isPlaying = sound.isPlaying();
-    if (isPlaying) sound.pause();
+    if (sound.isPlaying()) sound.pause();
     else sound.play();
   }
 }
 
 void mousePressed() {
-  speed.OnMouseClick();
-  volume.OnMouseClick();
-  play.OnMouseClick();
+  songSelector.OnMousePressed();
+  speed.OnMousePressed();
+  volume.OnMousePressed();
+  play.OnMousePressed();
 }
 
 void mouseReleased() {
   speed.OnMouseRelease();
   volume.OnMouseRelease();
+}
+
+void onFileSelected(File file) {
+  songSelector.OnFileSelected(file);
 }

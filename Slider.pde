@@ -1,4 +1,5 @@
 class Slider { //<>//
+  //TODO: Use button instead
   class SliderHandle {
     public SliderHandle(color clr, float w, float h) {
       this.clr = clr;
@@ -11,9 +12,19 @@ class Slider { //<>//
     private color clr;
     private float w, h;
     private float position; 
+    private PImage img = null;
+    private float imgScale = 1;
 
     void SetParent(Slider parent) {
       this.parent = parent;
+    }
+
+    void LoadImage(String path) {
+      img = loadImage(path);
+    }
+
+    void SetImageScale(float imgScale) {
+      this.imgScale = imgScale;
     }
 
     float GetPosition() {
@@ -33,7 +44,7 @@ class Slider { //<>//
 
     void SetPosition(float pos) {
       if (parent == null)
-        throw new NullPointerException();
+        throw new NullPointerException("Please set parent.");
       final float max = parent.w - w;
       final float min = 0;
       if (pos > max) pos = max;
@@ -49,10 +60,17 @@ class Slider { //<>//
     void Draw() {
       final float x = parent.x;
       final float y = parent.y;
+      final float localX = x + position;
+      final float localY = y + ((parent.h - h)/2);
       pushStyle();
       fill(clr);
       noStroke();
-      rect(x + position, y + ((parent.h - h)/2), w, h, 25);
+      rect(localX, localY, w, h, 25);
+      if (img != null) { 
+        final float imgW = w * imgScale;
+        final float imgH = h * imgScale;
+        image(img, localX + imgW/2, localY + imgH/2, imgW, imgH);
+      }
       popStyle();
     }
   }
@@ -108,7 +126,7 @@ class Slider { //<>//
     handle.Draw();
   }
 
-  void OnMouseClick() {
+  void OnMousePressed() {
     if (handle.IsMouseAbove())
       dragging = true;
   }
