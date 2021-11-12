@@ -56,11 +56,11 @@ void draw() {
 
   songSelector.Draw();
   if (songSelector.HasSelected()) {
+    if(!sound.isPlaying()) play.Invert();
     final String selection = songSelector.GetSelection();
     sound.stop();
-    sound = new SoundFile(this, selection);
+    sound = new SoundFile(this, selection); //<>//
     sound.play();
-    play.Invert();
   }
 
   speed.Draw();
